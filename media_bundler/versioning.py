@@ -91,10 +91,6 @@ class VersioningBase(object):
         self.versions[bundle.name] = versioned_basename
         versioned_path = os.path.join(dir, versioned_basename)
         shutil.copy(orig_path, versioned_path)
-        global _bundle_versions
-        if not _bundle_versions:
-            _bundle_versions = {}
-        _bundle_versions[bundle.name] = version
 
 
 class MtimeVersioning(VersioningBase):
