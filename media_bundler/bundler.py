@@ -88,7 +88,7 @@ class Bundle(object):
         filename = self.get_bundle_filename()
         return os.path.join(self.path, filename)
 
-    def get_bundle_url(self):
+    def get_bundle_url(self, versioner):
         filename = self.get_bundle_filename()
         if versioner:
             filename = versioner.get_version(bundle)
@@ -186,7 +186,7 @@ class PngSpriteBundle(Bundle):
         # of the last version of this bundle.
         if versioner:
             versioner.update_bundle_version(self)
-        self.generate_css(packing)
+        self.generate_css(packing, versioner)
 
     def _optimize_output(self):
         """Optimize the PNG with pngcrush."""
@@ -201,13 +201,13 @@ class PngSpriteBundle(Bundle):
                             '%s' % (proc.returncode, proc.stdout.read()))
         shutil.move(tmp_path, sprite_path)
 
-    def generate_css(self, packing):
+    def generate_css(self, packing, versioner):
         """Generate the background offset CSS rules."""
         with open(self.css_file, "w") as css:
             css.write("/* Generated classes for django-media-bundler sprites.  "
                       "Don't edit! */\n")
             props = {
-                "background-image": "url('%s')" % self.get_bundle_url(),
+                "background-image": "url('%s')" % self.get_bundle_url(versioner),
             }
             css.write(self.make_css(None, props))
             for (left, top, box) in packing:
