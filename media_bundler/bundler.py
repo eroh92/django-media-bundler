@@ -167,7 +167,9 @@ class PngSpriteBundle(Bundle):
         width = max(max(box.width for box in boxes),
                     (int(math.sqrt(total_area)) // 16 + 1) * 16)
         (_, height, packing) = pack_boxes(boxes, width)
-        sprite = Image.new("RGBA", (width, height))
+        sprite = Image.new( mode='RGBA',
+                            size=(width, height),
+                            color=(0,0,0,0))
         for (left, top, box) in packing:
             # This is a bit of magic to make the transparencies work.  To
             # preserve transparency, we pass the image so it can take its
@@ -175,8 +177,7 @@ class PngSpriteBundle(Bundle):
             # alpha channels, then it fails, we we have to check if the
             # image is RGBA here.
             img = box.image
-            mask = img if img.mode == "RGBA" else None
-            sprite.paste(img, (left, top), mask)
+            sprite.paste(img, (left, top))
         sprite.save(self.get_bundle_path(), "PNG")
         self._optimize_output()
         # It's *REALLY* important that this happen here instead of after the
@@ -216,7 +217,7 @@ class PngSpriteBundle(Bundle):
                 }
                 css.write(self.make_css(os.path.basename(box.filename), props))
 
-    CSS_REGEXP = re.compile(r"[^a-zA-Z\-_]")
+    CSS_REGEXP = re.compile(r"[^a-zA-Z0-9\-_]")
 
     def css_class_name(self, rule_name):
         name = self.name
