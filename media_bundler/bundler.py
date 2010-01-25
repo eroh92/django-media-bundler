@@ -223,7 +223,7 @@ class PngSpriteBundle(Bundle):
         name = self.name
         if rule_name:
             name += "-" + rule_name
-        name = name.replace(" ", "-").replace(".", "-")
+        name = name.replace(" ", "-").replace('.png','').replace('_','-').replace(".", "-")
         return self.CSS_REGEXP.sub("", name)
 
     def make_css(self, name, props):
