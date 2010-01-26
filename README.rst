@@ -89,6 +89,7 @@ Describe the Javascript and CSS bundles you would like to create in
            "foo.png",
            "bar.png",
            "baz.png",
+           "foo_bar/", # will include all files from this directory
        )},
   )
 

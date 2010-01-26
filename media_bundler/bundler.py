@@ -47,8 +47,19 @@ class Bundle(object):
         self.url = url
         if not url.endswith("/"):
             raise ValueError("Bundle URLs must end with a '/'.")
-        self.files = files
         self.type = type
+
+        new_files = []
+        for file in files:
+            if os.path.isdir(path + file):
+                if not file.endswith("/"):
+                    raise ValueError("Bundle URLs must end with a '/'.")
+                for new_file in os.listdir(path + file):
+                    new_files.append(file + new_file)
+            else:
+                new_files.append(file)
+        self.files = tuple(new_files)
+        
 
     @classmethod
     def check_attr(cls, attrs, attr):
@@ -59,6 +70,7 @@ class Bundle(object):
     def from_dict(cls, attrs):
         for attr in ("type", "name", "path", "url", "files"):
             cls.check_attr(attrs, attr)
+                        
         if attrs["type"] == "javascript":
             return JavascriptBundle(attrs["name"], attrs["path"], attrs["url"],
                                     attrs["files"], attrs["type"],
