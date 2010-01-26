@@ -119,3 +119,10 @@ the files in the bundle.
 If you are deferring your Javascript, then at the bottom of your base template
 you should insert the tag ``{% deferred_content %}``.  We recommend opening a
 second head tag after your body and putting it there.
+
+To add versioning add something like the following to settings.py::
+
+  BUNDLE_VERSION_FILE = PROJECT_ROOT + "/bundle_versions.py"
+
+For more settings details refer to ``default_settings.py`` in the ``conf``
+folder.
