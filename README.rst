@@ -63,6 +63,7 @@ Describe the Javascript and CSS bundles you would like to create in
        "path": MEDIA_ROOT + "/scripts/",
        "url": MEDIA_URL + "/scripts/",
        "minify": True,  # If you want to minify your source.
+       "closure": True, # If you want to use closure to minify your source.
        "files": (
            "foo.js",
            "bar.js",
@@ -127,3 +128,12 @@ To add versioning add something like the following to ``settings.py``::
 
 For more settings details refer to ``default_settings.py`` in the ``conf``
 folder.
+
+
+Google Closure
+--------------
+
+If you want to use Google closure, you will need to supply the path to
+``compiler.jar`` by setting ``CLOSURE_PATH`` in ``settings.py``
+
+http://code.google.com/closure/compiler/docs/gettingstarted_app.html

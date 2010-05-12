@@ -25,3 +25,4 @@ BUNDLE_VERSION_FILE = getattr(settings, "BUNDLE_VERSION_FILE",
                               default_settings.BUNDLE_VERSION_FILE)
 BUNDLE_VERSIONER = getattr(settings, "BUNDLE_VERSIONER",
                            default_settings.BUNDLE_VERSIONER)
+CLOSURE_PATH = getattr(settings, "CLOSURE_PATH", None)

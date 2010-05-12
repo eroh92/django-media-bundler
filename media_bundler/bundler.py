@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import re
-from StringIO import StringIO
 
 from media_bundler.conf import bundler_settings
 from media_bundler.bin_packing import Box, pack_boxes
@@ -74,7 +73,8 @@ class Bundle(object):
         if attrs["type"] == "javascript":
             return JavascriptBundle(attrs["name"], attrs["path"], attrs["url"],
                                     attrs["files"], attrs["type"],
-                                    attrs.get("minify", False))
+                                    attrs.get("minify", False),
+                                    attrs.get("closure", False))
         elif attrs["type"] == "css":
             return CssBundle(attrs["name"], attrs["path"], attrs["url"],
                              attrs["files"], attrs["type"],
@@ -125,9 +125,10 @@ class JavascriptBundle(Bundle):
 
     """Bundle for JavaScript."""
 
-    def __init__(self, name, path, url, files, type, minify):
+    def __init__(self, name, path, url, files, type, minify, closure):
         super(JavascriptBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
+        self.closure = closure
 
     def get_extension(self):
         return ".js"
@@ -135,6 +136,15 @@ class JavascriptBundle(Bundle):
     def _make_bundle(self):
         minifier = jsmin if self.minify else None
         self.do_text_bundle(minifier)
+
+        if self.closure:
+            bundle_path = self.get_bundle_path();
+            os.system('java -jar %s --js %s --js_output_file %s.tmp' % (
+                    bundler_settings.CLOSURE_PATH,
+                    bundle_path,
+                    bundle_path,
+            ))
+            os.system('mv %s.tmp %s' % (bundle_path, bundle_path))
 
 
 class CssBundle(Bundle):
