@@ -47,7 +47,9 @@ class Bundle(object):
         if not url.endswith("/"):
             raise ValueError("Bundle URLs must end with a '/'.")
         self.type = type
+        self.files = self.parse_files(files, path)
 
+    def parse_files(self, files, path):
         new_files = []
         for file in files:
             if os.path.isdir(path + file):
@@ -57,7 +59,7 @@ class Bundle(object):
                     new_files.append(file + new_file)
             else:
                 new_files.append(file)
-        self.files = tuple(new_files)
+        return tuple(new_files)
         
 
     @classmethod
@@ -74,7 +76,9 @@ class Bundle(object):
             return JavascriptBundle(attrs["name"], attrs["path"], attrs["url"],
                                     attrs["files"], attrs["type"],
                                     attrs.get("minify", False),
-                                    attrs.get("closure", False))
+                                    attrs.get("closure", False),
+                                    attrs.get("externs", None),
+                                    attrs.get("advanced_optimizations", False))
         elif attrs["type"] == "css":
             return CssBundle(attrs["name"], attrs["path"], attrs["url"],
                              attrs["files"], attrs["type"],
@@ -125,13 +129,19 @@ class JavascriptBundle(Bundle):
 
     """Bundle for JavaScript."""
 
-    def __init__(self, name, path, url, files, type, minify, closure):
+    def __init__(self, name, path, url, files, type, minify, closure, externs,
+               advanced_optimizations):
         super(JavascriptBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
         self.closure = closure
+        self.advanced_optimizations = advanced_optimizations
+        self.externs = self.parse_files(externs, path) if externs else None
 
     def get_extension(self):
         return ".js"
+
+    def get_externs(self):
+        return [os.path.join(self.path, f) for f in self.externs]
 
     def _make_bundle(self):
         minifier = jsmin if self.minify else None
@@ -139,12 +149,21 @@ class JavascriptBundle(Bundle):
 
         if self.closure:
             bundle_path = self.get_bundle_path();
-            os.system('java -jar %s --js %s --js_output_file %s.tmp' % (
+            command = 'java -jar %s --js_output_file %s' % (
                     bundler_settings.CLOSURE_PATH,
                     bundle_path,
-                    bundle_path,
-            ))
-            os.system('mv %s.tmp %s' % (bundle_path, bundle_path))
+            )
+            for file in self.get_paths():
+                command = '%s --js %s' % (command, file)
+            if self.externs:
+                for extern in self.get_externs():
+                    command = '%s --externs %s' % (command, extern)
+            if self.advanced_optimizations:
+                command = '%s --compilation_level ADVANCED_OPTIMIZATIONS' % (
+                    command
+                )
+
+            os.system(command)
 
 
 class CssBundle(Bundle):
