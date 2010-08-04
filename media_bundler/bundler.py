@@ -87,7 +87,8 @@ class Bundle(object):
             cls.check_attr(attrs, "css_file")
             return PngSpriteBundle(attrs["name"], attrs["path"], attrs["url"],
                                    attrs["files"], attrs["type"],
-                                   attrs["css_file"])
+                                   attrs["css_file"],
+                                   attrs["sprite_name"])
         else:
             raise InvalidBundleType(attrs["type"])
 
@@ -192,9 +193,10 @@ class PngSpriteBundle(Bundle):
     CSS.
     """
 
-    def __init__(self, name, path, url, files, type, css_file):
+    def __init__(self, name, path, url, files, type, css_file, sprite_name):
         super(PngSpriteBundle, self).__init__(name, path, url, files, type)
         self.css_file = css_file
+        self.sprite_name = sprite_name
 
     def get_extension(self):
         return ".png"
@@ -261,7 +263,7 @@ class PngSpriteBundle(Bundle):
     CSS_REGEXP = re.compile(r"[^a-zA-Z0-9\-_]")
 
     def css_class_name(self, rule_name):
-        name = self.name
+        name = self.sprite_name
         if rule_name:
             name += "-" + rule_name
         name = name.replace(" ", "-").replace('.png','').replace('_','-').replace(".", "-")
