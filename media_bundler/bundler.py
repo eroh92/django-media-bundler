@@ -12,6 +12,7 @@ from media_bundler.conf import bundler_settings
 from media_bundler.bin_packing import Box, pack_boxes
 from media_bundler.jsmin import jsmin
 from media_bundler.cssmin import minify_css
+from media_bundler.datauris import add_data_uris_to_css_file
 from media_bundler import versioning
 
 
@@ -82,7 +83,8 @@ class Bundle(object):
         elif attrs["type"] == "css":
             return CssBundle(attrs["name"], attrs["path"], attrs["url"],
                              attrs["files"], attrs["type"],
-                             attrs.get("minify", False))
+                             attrs.get("minify", False),
+                             attrs.get("data_uri_images", False))
         elif attrs["type"] == "png-sprite":
             cls.check_attr(attrs, "css_file")
             return PngSpriteBundle(attrs["name"], attrs["path"], attrs["url"],
@@ -171,9 +173,10 @@ class CssBundle(Bundle):
 
     """Bundle for CSS."""
 
-    def __init__(self, name, path, url, files, type, minify):
+    def __init__(self, name, path, url, files, type, minify, data_uri_images):
         super(CssBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
+        self.data_uri_images = data_uri_images
 
     def get_extension(self):
         return ".css"
@@ -181,7 +184,8 @@ class CssBundle(Bundle):
     def _make_bundle(self):
         minifier = minify_css if self.minify else None
         self.do_text_bundle(minifier)
-
+        if self.data_uri_images:
+            add_data_uris_to_css_file(self.get_bundle_path())
 
 class PngSpriteBundle(Bundle):
 
