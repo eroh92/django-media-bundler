@@ -2,7 +2,7 @@ import base64
 import re
 import os
 
-URL_FINDER = re.compile('url\(.*\)')
+URL_FINDER = re.compile('url\(.*?\)')
 STRIP_URL = re.compile('url\(|\)|\'|"')
 
 file_extensions_to_types = {
@@ -38,14 +38,21 @@ def _parse_image_url_into_data_uris(css_path, image_url):
 def add_data_uris_to_css_file(css_path):
     css_file_content = ''
     with open(css_path, 'r') as css_file:
-	css_file_content = css_file.read()
+        css_file_content = css_file.read()
         image_urls = _extract_image_urls_from_css(css_file_content)
         for css_image_url in image_urls:
-            image_url = _get_image_path_from_css_url(css_image_url)
-            data_uri = _parse_image_url_into_data_uris(css_path, image_url)
-            css_file_content = css_file_content.replace(image_url, data_uri)
+            try:
+                image_url = _get_image_path_from_css_url(css_image_url)
+                data_uri = _parse_image_url_into_data_uris(css_path, image_url)
+                css_file_content = css_file_content.replace(image_url, data_uri)
+            except KeyError:
+                pass
+            except IOError:
+                pass
+
     with open(css_path, 'w') as css_file:
         css_file.write(css_file_content)
+
 
 def _get_file_type(path):
     return file_extensions_to_types[_get_file_extension_from_path(path)]
